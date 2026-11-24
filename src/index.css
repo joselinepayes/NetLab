@@ -1,0 +1,104 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --c-bg: #f4f7fc;
+  --c-card: #ffffff;
+  --c-border: #d6dfef;
+  --c-text: #0f1b3a;
+  --c-muted: #5a6786;
+  --c-blue: #1d4ed8;
+  --c-blue-soft: #dbe7ff;
+  --c-green: #059669;
+  --c-green-soft: #d1fae5;
+  --c-yellow: #f5b800;
+  --c-yellow-soft: #fff3c2;
+  --c-red: #dc2626;
+  --c-red-soft: #fee2e2;
+  --c-edge: #8a97b5;
+  --c-node: #eef3fc;
+  --c-node-stroke: #5a6b92;
+}
+.dark {
+  --c-bg: #060d22;
+  --c-card: #0d1938;
+  --c-border: #223564;
+  --c-text: #e8eeff;
+  --c-muted: #9db0d8;
+  --c-blue: #4c8dff;
+  --c-blue-soft: #14306b;
+  --c-green: #2fd9a0;
+  --c-green-soft: #0b3a33;
+  --c-yellow: #ffd23f;
+  --c-yellow-soft: #4a3d08;
+  --c-red: #ff6b6b;
+  --c-red-soft: #4a1717;
+  --c-edge: #6b7fae;
+  --c-node: #12234f;
+  --c-node-stroke: #7d93c9;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+.card { background: var(--c-card); border: 1px solid var(--c-border); border-radius: 1rem; }
+.muted { color: var(--c-muted); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+  min-height: 44px; min-width: 44px; padding: .5rem .9rem; border-radius: .75rem;
+  font-weight: 600; font-size: .9rem; border: 1px solid var(--c-border);
+  background: var(--c-card); color: var(--c-text); cursor: pointer; transition: all .15s;
+  touch-action: manipulation;
+}
+.btn:hover:not(:disabled) { border-color: var(--c-blue); }
+.btn:active:not(:disabled) { transform: scale(.97); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-primary { background: var(--c-blue); color: #fff; border-color: var(--c-blue); }
+.btn-green { background: var(--c-green); color: #fff; border-color: var(--c-green); }
+.btn:focus-visible, .field:focus-visible, .tab:focus-visible { outline: 3px solid var(--c-yellow); outline-offset: 2px; }
+
+.field {
+  min-height: 44px; width: 100%; padding: .5rem .8rem; border-radius: .75rem;
+  border: 1px solid var(--c-border); background: var(--c-bg); color: var(--c-text); font-size: 1rem;
+}
+.tab {
+  display: inline-flex; align-items: center; gap: .4rem; white-space: nowrap;
+  min-height: 44px; padding: 0 .9rem; border-radius: .75rem; font-weight: 600; font-size: .9rem;
+  color: var(--c-muted); cursor: pointer; border: 1px solid transparent; background: transparent;
+}
+.tab[aria-selected='true'] { background: var(--c-blue); color: #fff; }
+.tab:hover:not([aria-selected='true']) { background: var(--c-blue-soft); color: var(--c-text); }
+
+.chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: .1rem .55rem; border-radius: .5rem; font-weight: 700;
+}
+.chip-blue { background: var(--c-blue-soft); color: var(--c-blue); }
+.chip-green { background: var(--c-green-soft); color: var(--c-green); }
+.chip-yellow { background: var(--c-yellow-soft); color: var(--c-text); box-shadow: inset 0 0 0 2px var(--c-yellow); }
+.chip-red { background: var(--c-red-soft); color: var(--c-red); }
+
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+@keyframes pop { from { transform: scale(.92); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+.pop { animation: pop .25s ease-out; }
+@keyframes glow { 0%,100% { filter: drop-shadow(0 0 4px var(--c-blue)) } 50% { filter: drop-shadow(0 0 12px var(--c-blue)) } }
+.glow-blue { animation: glow 1.6s ease-in-out infinite; }
+@keyframes glowg { 0%,100% { filter: drop-shadow(0 0 4px var(--c-green)) } 50% { filter: drop-shadow(0 0 12px var(--c-green)) } }
+.glow-green { animation: glowg 1.6s ease-in-out infinite; }
+
+.edge { transition: opacity .3s, stroke .3s, stroke-width .3s; }
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
