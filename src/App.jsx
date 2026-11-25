@@ -2,6 +2,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { Moon, Network, Sun } from 'lucide-react'
 import { MODULES } from './modules/registry.js'
 import { useStored } from './shared/storage.js'
+import UpdatePrompt from './shared/UpdatePrompt.jsx'
 
 export default function App() {
   const ready = MODULES.filter((m) => m.status === 'ready')
@@ -19,7 +20,7 @@ export default function App() {
   const Mod = mod.component
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0b1e4a] text-white" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <header className="no-print sticky top-0 z-30 border-b border-white/10 bg-[#0b1e4a] text-white" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:h-16">
           <Network className="text-[#60a5fa]" size={26} />
           <div className="leading-tight">
@@ -47,13 +48,14 @@ export default function App() {
         </Suspense>
       </main>
 
-      <footer className="mx-auto max-w-7xl px-4 pb-10 pt-4 text-xs muted" style={{ paddingBottom: 'calc(2.5rem + env(safe-area-inset-bottom))' }}>
+      <footer className="no-print mx-auto max-w-7xl px-4 pb-10 pt-4 text-xs muted" style={{ paddingBottom: 'calc(2.5rem + env(safe-area-inset-bottom))' }}>
         <p className="mb-2 font-semibold">Próximos simuladores</p>
         <ul className="mb-3 flex flex-wrap gap-1.5">
           {soon.map((m) => <li key={m.id} className="rounded-lg border border-[var(--c-border)] px-2 py-1">{m.name}</li>)}
         </ul>
-        <p>NetLab funciona sin conexión y guarda tu progreso solo en este dispositivo. Sin servidores, sin cuentas, sin IA.</p>
+        <p>NetLab funciona sin conexión y guarda tu progreso solo en este dispositivo. Sin servidores, sin cuentas, sin IA. · Versión {__APP_VERSION__}</p>
       </footer>
+      <UpdatePrompt />
     </div>
   )
 }

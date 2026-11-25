@@ -2,6 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { readFileSync } from 'node:fs'
+
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'))
 
 // En GitHub Pages la app vive en https://USUARIO.github.io/NOMBRE-REPO/
 // El workflow define BASE_PATH con el nombre real del repositorio.
@@ -10,11 +13,13 @@ const base = process.env.BASE_PATH || '/NetLab/'
 
 export default defineConfig({
   base,
+  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   plugins: [
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'prompt': la app avisa «Nueva versión disponible» y actualiza cuando el usuario pulsa el botón
+      registerType: 'prompt',
       includeAssets: ['favicon.svg', 'icon-180.png'],
       manifest: {
         name: 'NetLab — Simuladores de Redes',
@@ -37,7 +42,6 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
-        skipWaiting: true,
         navigateFallback: base + 'index.html',
       },
     }),

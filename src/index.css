@@ -102,3 +102,40 @@ body {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* ───── CRC: división larga ───── */
+:root { --c-violet: #7c3aed; --c-violet-soft: #ede9fe; }
+.dark { --c-violet: #b79bff; --c-violet-soft: #2a1d57; }
+.dv-cell { position: absolute; display: flex; align-items: center; justify-content: center; font-weight: 700; border-radius: .4rem; color: var(--c-text); }
+.dv-msg { color: var(--c-blue); background: var(--c-blue-soft); }
+.dv-pad { color: var(--c-violet); background: var(--c-violet-soft); outline: 1.5px dashed var(--c-violet); outline-offset: -2px; }
+.dv-rem { color: var(--c-green); background: var(--c-green-soft); }
+.dv-err { color: #fff; background: var(--c-red); }
+.dv-gen { color: #fff; background: var(--c-blue); }
+.dv-op { color: var(--c-blue); background: var(--c-blue-soft); }
+.dv-yellow { color: var(--c-text); background: var(--c-yellow-soft); outline: 2px solid var(--c-yellow); outline-offset: -2px; }
+.dv-struck { color: var(--c-muted); text-decoration: line-through; text-decoration-thickness: 3px; opacity: .8; }
+.dv-final { color: #fff; background: var(--c-green); }
+.dv-block { box-shadow: 0 0 0 2.5px var(--c-blue); }
+.dv-pending { color: var(--c-muted); opacity: .45; }
+.dv-line { position: absolute; background: var(--c-text); opacity: .7; }
+.dv-arrow { position: absolute; width: 0; border-left: 2px solid var(--c-yellow); }
+.dv-arrow::after { content: ''; position: absolute; bottom: -3px; left: -7px; border: 6px solid transparent; border-top: 9px solid var(--c-yellow); border-bottom: 0; }
+.dv-arrow-skip { border-left-style: dashed; border-color: var(--c-muted); opacity: .6; }
+.dv-arrow-skip::after { border-top-color: var(--c-muted); }
+
+/* ───── Impresión ───── */
+.print-only { display: none; }
+@media print {
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  body { background: #fff !important; overflow: visible; }
+  .print-sheet {
+    --c-bg: #fff; --c-card: #fff; --c-border: #bbb; --c-text: #000; --c-muted: #444;
+    --c-blue: #1d4ed8; --c-blue-soft: #dbe7ff; --c-green: #047857; --c-green-soft: #d1fae5;
+    --c-yellow: #d99a00; --c-yellow-soft: #fff3c2; --c-red: #dc2626; --c-violet: #6d28d9; --c-violet-soft: #ede9fe;
+    color: #000; background: #fff;
+  }
+  .print-sheet .dv-box { overflow: visible !important; max-height: none !important; border: 1px solid #bbb; }
+  .print-sheet section { break-inside: avoid; }
+}
