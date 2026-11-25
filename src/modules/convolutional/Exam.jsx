@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, ClipboardCheck, History, Repeat, Timer, Trash2 } from 'lucide-react'
 import { encodeByDiagram, LEVELS, OFFICIAL_EXERCISES, randomForLevel } from './engine.js'
 import { Section } from '../../shared/ui.jsx'
+import { DirectionArrow } from './ProcessingOrder.jsx'
 import { useStored } from '../../shared/storage.js'
 
 const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
@@ -53,7 +54,7 @@ export default function Exam() {
     return (
       <div className="space-y-4">
         <Section title="Modo examen" icon={ClipboardCheck}>
-          <p className="muted mb-3 text-sm">Resuelve sin ayudas: no se muestran respuestas ni diagrama. Escribe la salida completa de cada secuencia.</p>
+          <p className="muted mb-3 text-sm">Resuelve sin ayudas: no se muestran respuestas ni diagrama. Cada secuencia se procesa de derecha a izquierda; escribe la salida completa en el orden en que se genera.</p>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="text-sm font-bold">Nivel
               <select className="field mt-1" value={level} onChange={(e) => setLevel(e.target.value)}>
@@ -79,8 +80,8 @@ export default function Exam() {
     const answered = answers.filter(Boolean).length
     return (
       <Section title={`Ejercicio ${idx + 1} de ${exercises.length}`} icon={ClipboardCheck} right={<span className="chip chip-blue mono text-base"><Timer size={16} className="mr-1" />{fmt(secs)}</span>}>
-        <p className="muted text-sm">Codifica esta secuencia (estado inicial 00):</p>
-        <p className="mono my-2 break-all text-2xl font-extrabold tracking-widest">{bits}</p>
+        <p className="muted text-sm">Codifica esta secuencia procesándola de <b>derecha a izquierda</b> (estado inicial 00). Escribe la salida en el orden en que se genera:</p>
+        <div className="mt-2 inline-block"><DirectionArrow /><p className="mono my-1 break-all text-2xl font-extrabold tracking-widest">{bits}</p></div>
         <label className="text-sm font-bold" htmlFor="ans">Tu respuesta ({bits.length * 2} bits esperados)</label>
         <input id="ans" className="field mono mt-1 text-lg tracking-widest" inputMode="numeric" autoComplete="off" value={val}
           onChange={(e) => setAnswers(answers.map((a, i) => (i === idx ? e.target.value.replace(/[^01]/g, '') : a)))} />

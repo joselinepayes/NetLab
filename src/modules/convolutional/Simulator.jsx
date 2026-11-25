@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import {
-  ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Dices, Pause, Play, RotateCcw, Rocket, Table2, Trophy, Footprints,
+  ArrowLeft, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Dices, Pause, Play, RotateCcw, Rocket, Table2, Trophy, Footprints,
 } from 'lucide-react'
 import StateDiagram from './StateDiagram.jsx'
 import { simReducer, initialSim } from './simulatorState.js'
-import { encodeByDiagram, explainStep, OFFICIAL_EXERCISES, procedureText, randomBits, validateBits, INITIAL_STATE } from './engine.js'
+import { encodeByDiagram, explainStep, OFFICIAL_EXERCISES, procedureText, randomBits, validateBits, reverseBits, INITIAL_STATE } from './engine.js'
+import ProcessingOrder from './ProcessingOrder.jsx'
 import { BitStrip, CopyButton, Legend, Section } from '../../shared/ui.jsx'
 
 const SPEEDS = { slow: { label: 'Lenta', ms: 3200 }, normal: { label: 'Normal', ms: 1800 }, fast: { label: 'Rápida', ms: 900 } }
@@ -56,7 +57,7 @@ export default function Simulator({ bits, setBits }) {
               aria-label="Secuencia binaria de entrada" aria-invalid={!check.ok} placeholder="Ej.: 10101101"
             />
             <p className={`mt-1 min-h-5 text-xs ${check.ok ? 'muted' : 'text-[var(--c-red)]'}`}>
-              {check.ok ? `${check.value.length} bits de entrada → ${check.value.length * 2} bits de salida · se conservan los ceros iniciales` : check.error}
+              {check.ok ? `${check.value.length} bits → ${check.value.length * 2} bits de salida · se procesa de derecha a izquierda: ${reverseBits(check.value)}` : check.error}
             </p>
           </div>
           <button className="btn btn-primary sm:w-auto" disabled={!check.ok} onClick={() => startWith(draft)}>
@@ -73,6 +74,11 @@ export default function Simulator({ bits, setBits }) {
             <Dices size={18} /> Aleatorio
           </button>
         </div>
+      </Section>
+
+      <Section title="Orden de procesamiento" icon={ArrowLeft}>
+        <p className="muted mb-3 text-sm">La entrada se codifica de <b>derecha a izquierda</b>: se invierte el orden de los bits antes de empezar en el estado {INITIAL_STATE}. La entrada original no cambia.</p>
+        <ProcessingOrder bits={bits} idx={sim.idx} />
       </Section>
 
       <div className="grid gap-4 lg:grid-cols-5">
@@ -146,29 +152,23 @@ export default function Simulator({ bits, setBits }) {
         <p className="sr-only" aria-live="polite">{step ? `Paso ${sim.idx + 1}: ${explainStep(step, sim.total)}` : ''}</p>
       </Section>
 
-      <Section title="Entrada y salida acumulada">
-        <div className="space-y-3">
-          <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-wide muted">Entrada ({bits.length} bits)</p>
-            <BitStrip bits={bits} highlight={sim.idx} />
-          </div>
-          <div>
-            <p className="mb-1 text-xs font-bold uppercase tracking-wide muted">Salida acumulada ({accumulated.length} de {bits.length * 2} bits)</p>
-            <div className="min-h-9">
-              {accumulated ? <BitStrip bits={accumulated} highlight={sim.idx} group={2} tone="green" /> : <span className="muted text-sm">— aún vacía —</span>}
-            </div>
+      <Section title="Salida acumulada">
+        <div>
+          <p className="mb-1 text-xs font-bold uppercase tracking-wide muted">Salida ({accumulated.length} de {bits.length * 2} bits) · en el orden en que se genera</p>
+          <div className="min-h-9">
+            {accumulated ? <BitStrip bits={accumulated} highlight={sim.idx} group={2} tone="green" /> : <span className="muted text-sm">— aún vacía —</span>}
           </div>
         </div>
       </Section>
 
       <Section title="Tabla de procedimiento" icon={Table2}>
-        <ProcedureTable steps={doneSteps} activeIdx={sim.idx} />
+        <ProcedureTable steps={doneSteps} activeIdx={sim.idx} total={bits.length} />
       </Section>
 
       {finished && (
         <Section title="Resumen final" icon={Trophy} className="pop border-[var(--c-green)]">
           <dl className="grid gap-2 text-sm sm:grid-cols-2">
-            <div><dt className="muted">Entrada</dt><dd className="mono break-all text-lg font-bold">{bits}</dd></div>
+            <div><dt className="muted">Entrada original → orden de procesamiento</dt><dd className="mono break-all text-lg font-bold">{bits} → {reverseBits(bits)}</dd></div>
             <div><dt className="muted">Salida ({result.output.length} bits = 2 × {bits.length})</dt><dd className="mono break-all text-lg font-bold text-[var(--c-green)]">{result.output}</dd></div>
             <div><dt className="muted">Estado final</dt><dd className="mono text-lg font-bold">{result.finalState}</dd></div>
           </dl>
@@ -191,22 +191,23 @@ function Fact({ label, value, tone, wide }) {
   )
 }
 
-export function ProcedureTable({ steps, activeIdx }) {
+export function ProcedureTable({ steps, activeIdx, total }) {
   return (
     <div className="scroll-x">
       <table className="w-full min-w-[320px] text-center text-sm">
         <thead>
           <tr className="muted text-xs uppercase">
-            <th className="p-2">Paso</th><th className="p-2">Estado actual</th><th className="p-2">Entrada</th><th className="p-2">Salida</th><th className="p-2">Nuevo estado</th>
+            <th className="p-2">Paso</th><th className="p-2">Estado actual</th><th className="p-2">Entrada</th><th className="p-2">Posición</th><th className="p-2">Salida</th><th className="p-2">Nuevo estado</th>
           </tr>
         </thead>
         <tbody className="mono font-semibold">
-          {steps.length === 0 && <tr><td colSpan={5} className="p-4 text-sm muted" style={{ fontFamily: 'inherit' }}>Se completa automáticamente al avanzar la simulación.</td></tr>}
+          {steps.length === 0 && <tr><td colSpan={6} className="p-4 text-sm muted" style={{ fontFamily: 'inherit' }}>Se completa automáticamente al avanzar la simulación.</td></tr>}
           {steps.map((s) => (
             <tr key={s.index} className={`border-t border-[var(--c-border)] ${s.index === activeIdx ? 'bg-[var(--c-blue-soft)]' : ''}`} aria-current={s.index === activeIdx}>
               <td className="p-2">{s.index + 1}</td>
               <td className="p-2 text-[var(--c-blue)]">{s.state}</td>
               <td className="p-2"><span className="chip chip-yellow">{s.input}</span></td>
+              <td className="p-2 text-xs font-sans muted">{s.origIndex + 1}.º de {total} (desde la izq.)</td>
               <td className="p-2 text-[var(--c-green)]">{s.output}</td>
               <td className="p-2 text-[var(--c-green)]">{s.next}</td>
             </tr>

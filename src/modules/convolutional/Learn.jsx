@@ -1,13 +1,17 @@
 import { useState } from 'react'
-import { AlertTriangle, ArrowRight, BookOpen, Circle, Layers, Play, Tag } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, ArrowRight, BookOpen, Circle, Layers, Play, Tag } from 'lucide-react'
 import StateDiagram from './StateDiagram.jsx'
 import { followArrow, STATES } from './engine.js'
 import { Section } from '../../shared/ui.jsx'
+import ProcessingOrder from './ProcessingOrder.jsx'
+import { reverseBits } from './engine.js'
 
 export default function Learn({ onGoSimulator }) {
   const [state, setState] = useState('00')
   const [input, setInput] = useState('1')
   const [n, setN] = useState(8)
+  const [stepEx, setStepEx] = useState(2)
+  const example = '01011100'
   const e = followArrow(state, input)
 
   return (
@@ -59,7 +63,16 @@ export default function Learn({ onGoSimulator }) {
         <p className="text-sm leading-relaxed">Antes de que entre el primer bit no hay historia: la memoria está <b>vacía</b>, es decir, todo ceros. Por eso el codificador siempre arranca en <b className="mono">00</b>. Si el enunciado no dice lo contrario, ése es el punto de partida.</p>
       </Section>
 
-      <Section title="4. ¿Por qué 8 bits de entrada dan 16 de salida?" icon={Layers}>
+      <Section title="4. ¿En qué dirección se lee la entrada?" icon={ArrowLeft}>
+        <p className="mb-2 text-sm leading-relaxed">La entrada se procesa de <b>derecha a izquierda</b>: el primer bit que se codifica es el del <b>extremo derecho</b> y se avanza hacia la izquierda, un bit a la vez. Para no equivocarse, se <b>invierte el orden</b> de los bits antes de empezar en el estado <span className="mono">00</span>; la entrada original no se modifica.</p>
+        <p className="mb-2 text-sm">Ejemplo: <span className="mono font-bold">{example}</span> → se procesa <span className="mono font-bold">{reverseBits(example)}</span>, es decir, los bits <span className="mono">0, 0, 1, 1, 1, 0, 1, 0</span> en ese orden.</p>
+        <label className="mb-2 block text-sm font-bold">Paso: {stepEx === 0 ? 'sin iniciar' : `${stepEx} de ${example.length}`}
+          <input type="range" min={0} max={example.length} value={stepEx} onChange={(ev) => setStepEx(+ev.target.value)} className="mt-1 block h-8 w-full accent-[var(--c-blue)]" />
+        </label>
+        <ProcessingOrder bits={example} idx={stepEx - 1} />
+      </Section>
+
+      <Section title="5. ¿Por qué 8 bits de entrada dan 16 de salida?" icon={Layers}>
         <p className="text-sm leading-relaxed">Cada bit que entra hace que el codificador emita <b>2 bits</b> (cada etiqueta tiene salida de dos dígitos). Es un código de razón <b>1/2</b>.</p>
         <label className="mt-3 block text-sm font-bold">Bits de entrada: {n}
           <input type="range" min={1} max={16} value={n} onChange={(ev) => setN(+ev.target.value)} className="mt-1 block h-8 w-full accent-[var(--c-blue)]" />
@@ -75,18 +88,19 @@ export default function Learn({ onGoSimulator }) {
         <p className="mt-2 text-sm font-bold">{n} bits de entrada × 2 = <span className="text-[var(--c-green)]">{n * 2} bits de salida</span></p>
       </Section>
 
-      <Section title="5. Procedimiento en 4 pasos" icon={BookOpen}>
+      <Section title="6. Procedimiento en 4 pasos" icon={BookOpen}>
         <ol className="list-decimal space-y-1 pl-5 text-sm leading-relaxed">
           <li>Parte del estado actual (al inicio, <b className="mono">00</b>).</li>
-          <li>Lee el siguiente bit de entrada.</li>
+          <li>Lee el siguiente bit de entrada, empezando por el del <b>extremo derecho</b> y avanzando hacia la izquierda.</li>
           <li>Sigue la flecha que sale de ese estado y empieza con ese bit; escribe su salida.</li>
           <li>El nuevo estado es donde termina la flecha. Repite hasta agotar la entrada.</li>
         </ol>
         <button className="btn btn-primary mt-3" onClick={onGoSimulator}><Play size={18} /> Ver un ejemplo en el simulador</button>
       </Section>
 
-      <Section title="6. Errores comunes" icon={AlertTriangle}>
+      <Section title="7. Errores comunes" icon={AlertTriangle}>
         <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed">
+          <li>Leer la entrada de izquierda a derecha: se procesa de <b>derecha a izquierda</b> (el primer bit es el último de la cadena).</li>
           <li>Confundir <b>entrada</b> con <b>salida</b>: lo que va antes de la «/» es la entrada; lo de después, la salida.</li>
           <li>Olvidar actualizar el estado: el siguiente paso comienza donde terminó la flecha anterior, no en <span className="mono">00</span>.</li>
           <li>Eliminar los ceros iniciales: <span className="mono">00110100</span> tiene 8 bits, no 6.</li>

@@ -3,6 +3,7 @@ import { CheckCircle2, ChevronLeft, ChevronRight, GitBranch, Grid3x3, Sigma } fr
 import StateDiagram from './StateDiagram.jsx'
 import { compareMethods, STATES, TABLE, xorStep } from './engine.js'
 import { Section } from '../../shared/ui.jsx'
+import ProcessingOrder from './ProcessingOrder.jsx'
 
 const METHODS = [
   { id: 'diagram', name: '1 · Diagrama', icon: GitBranch },
@@ -21,7 +22,8 @@ export default function Methods({ bits }) {
   return (
     <div className="space-y-4">
       <Section title="Tres formas de llegar al mismo resultado" icon={CheckCircle2}>
-        <p className="muted mb-3 text-sm">Secuencia actual: <b className="mono text-[var(--c-text)]">{bits}</b> (cámbiala en la pestaña Simulador).</p>
+        <p className="muted mb-3 text-sm">Secuencia actual: <b className="mono text-[var(--c-text)]">{bits}</b> (cámbiala en la pestaña Simulador). Los tres métodos la procesan de <b>derecha a izquierda</b>.</p>
+        <div className="mb-3"><ProcessingOrder bits={bits} idx={idx} /></div>
         <div className="grid gap-2 sm:grid-cols-3">
           {METHODS.map((m) => (
             <div key={m.id} className="rounded-xl border border-[var(--c-border)] p-3 text-sm">
@@ -67,7 +69,7 @@ function MethodDiagram({ step }) {
       <StateDiagram current={step.state} next={step.next} selectedEdge={step.edgeId} particleKey={step.index + step.edgeId} particleMs={900} />
       <ol className="list-decimal space-y-2 pl-5 text-sm leading-relaxed">
         <li>Ubica el estado actual: <b className="chip chip-blue mono">{step.state}</b></li>
-        <li>De ese estado salen dos flechas; elige la que empieza con el bit <b className="chip chip-yellow mono">{step.input}</b>.</li>
+        <li>De ese estado salen dos flechas; elige la que empieza con el bit <b className="chip chip-yellow mono">{step.input}</b> (el {step.index + 1}.º contando desde la derecha).</li>
         <li>La etiqueta de esa flecha es <b className="mono">{step.input}/{step.output}</b>: lo que sigue a la «/» es la salida <b className="chip chip-green mono">{step.output}</b>.</li>
         <li>La punta de la flecha llega al nuevo estado: <b className="chip chip-green mono">{step.next}</b>.</li>
       </ol>

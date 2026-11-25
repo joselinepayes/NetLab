@@ -19,11 +19,17 @@ export const TRANSITIONS = Object.freeze([
 export const edgeId = (from, input) => `${from}|${input}`
 export const EDGES = TRANSITIONS.map((t) => ({ ...t, id: edgeId(t.from, t.input), label: `${t.input}/${t.output}` }))
 
+// La entrada se procesa de DERECHA a IZQUIERDA (método de la profesora): se invierte el orden
+// de los bits antes de codificar. `processed` es esa secuencia invertida y `expected` la salida,
+// escrita en el orden en que se genera (primer par calculado a la izquierda).
 export const OFFICIAL_EXERCISES = Object.freeze([
-  { bits: '10101101', expected: '1101000100101000' },
-  { bits: '00110100', expected: '0000111010000111' },
-  { bits: '10011001', expected: '1101111110101111' },
+  { bits: '10101101', processed: '10110101', expected: '1101001010000100' },
+  { bits: '00110100', processed: '00101100', expected: '0000110100101011' },
+  { bits: '10011001', processed: '10011001', expected: '1101111110101111' },
 ])
+
+/** Orden en que se procesa una entrada: de derecha a izquierda (bits invertidos). */
+export const reverseBits = (s) => s.split('').reverse().join('')
 
 export const LEVELS = Object.freeze([
   { id: 'basic', name: 'Básico', min: 4, max: 4 },
@@ -54,16 +60,21 @@ export function randomForLevel(levelId, rng = Math.random) {
   return randomBits(len, rng)
 }
 
-function run(bits, initial, fn, method) {
+function run(original, initial, fn, method) {
+  const bits = reverseBits(original) // se procesa de derecha a izquierda
   let state = initial
   const steps = []
   for (let i = 0; i < bits.length; i++) {
     const input = bits[i]
     const r = fn(state, input)
-    steps.push({ index: i, method, state, input, output: r.output, next: r.next, edgeId: edgeId(state, input), detail: r.detail })
+    steps.push({
+      index: i, // orden de procesamiento (0 = bit del extremo derecho)
+      origIndex: original.length - 1 - i, // posición del bit en la entrada original (0 = izquierda)
+      method, state, input, output: r.output, next: r.next, edgeId: edgeId(state, input), detail: r.detail,
+    })
     state = r.next
   }
-  return { steps, output: steps.map((s) => s.output).join(''), finalState: state }
+  return { original, processed: bits, steps, output: steps.map((s) => s.output).join(''), finalState: state }
 }
 
 // Método 1 — seguir flechas del diagrama (aristas salientes de cada estado)
@@ -112,21 +123,28 @@ export function compareMethods(bits, initial = INITIAL_STATE) {
 
 export const encode = encodeByDiagram
 
-const ORD = ['primer', 'segundo', 'tercer', 'cuarto', 'quinto', 'sexto', 'séptimo', 'octavo', 'noveno', 'décimo']
 export function explainStep(step, total) {
   const n = step.index + 1
-  const ord = n <= ORD.length ? `${ORD[step.index]} bit` : `bit número ${n}`
   const label = `${step.input}/${step.output}`
+  const bitTxt = step.index === 0
+    ? `el bit del extremo derecho de la entrada es ${step.input}`
+    : `el siguiente bit hacia la izquierda (el ${n}.º contando desde la derecha) es ${step.input}`
   const intro = step.index === 0
-    ? `Comenzamos en el estado ${step.state}. Como el ${ord} de entrada es ${step.input}, `
-    : `Seguimos en el estado ${step.state} (al que llegamos en el paso anterior). El ${ord} de entrada es ${step.input}, por lo que `
-  const end = n === total ? ' Este era el último bit de entrada.' : ''
+    ? `Comenzamos en el estado ${step.state} y leemos la entrada de derecha a izquierda. Como ${bitTxt}, `
+    : `Seguimos en el estado ${step.state} (al que llegamos en el paso anterior). Ahora ${bitTxt}, por lo que `
+  const end = n === total ? ' Este era el último bit: el del extremo izquierdo de la entrada.' : ''
   return `${intro}buscamos la flecha que sale de este estado y comienza con ${step.input}. Seguimos la flecha ${label}, escribimos ${step.output} como salida y llegamos al estado ${step.next}.${end}`
 }
 
 export function procedureText(bits, result) {
-  const lines = [`Entrada: ${bits}`, `Estado inicial: ${INITIAL_STATE}`, '', 'Paso | Estado actual | Entrada | Salida | Nuevo estado']
+  const lines = [
+    `Entrada original: ${bits}`,
+    `Se procesa de derecha a izquierda → orden de procesamiento: ${reverseBits(bits)}`,
+    `Estado inicial: ${INITIAL_STATE}`,
+    '',
+    'Paso | Estado actual | Entrada (bit procesado) | Salida | Nuevo estado',
+  ]
   result.steps.forEach((s) => lines.push(`${s.index + 1} | ${s.state} | ${s.input} | ${s.output} | ${s.next}`))
-  lines.push('', `Salida: ${result.output}`, `Estado final: ${result.finalState}`)
+  lines.push('', `Salida (en el orden en que se genera): ${result.output}`, `Estado final: ${result.finalState}`)
   return lines.join('\n')
 }

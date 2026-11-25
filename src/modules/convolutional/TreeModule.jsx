@@ -17,7 +17,7 @@ export default function TreeModule() {
             Esta sección está <b>preparada, pero aún sin activar</b>. El árbol de codificación puede tener entradas y salidas distintas a las del diagrama de estados, por eso no se inventó ninguna rama.
           </p>
           <p className="muted max-w-prose text-sm leading-relaxed">
-            Cuando se proporcione la imagen original del árbol, se transcribirán sus ramas (entrada, salida y nodo destino) en <code className="mono">treeDefinition.js</code> y esta pestaña mostrará el recorrido animado, los niveles según la longitud de la entrada y la salida acumulada.
+            Cuando se proporcione la imagen original del árbol, se transcribirán sus ramas (entrada, salida y nodo destino) en <code className="mono">treeDefinition.js</code> y esta pestaña mostrará el recorrido animado. La <b>dirección de lectura del árbol</b> (izquierda→derecha o derecha→izquierda) se verificará por separado con el material original, sin asumir la del diagrama de estados. Después se mostrará el recorrido animado, los niveles según la longitud de la entrada y la salida acumulada.
           </p>
         </div>
       </Section>

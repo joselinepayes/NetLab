@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { Dices, Lightbulb, RotateCcw, Target } from 'lucide-react'
 import StateDiagram from './StateDiagram.jsx'
 import { encodeByDiagram, OFFICIAL_EXERCISES, randomBits, STATES, validateBits } from './engine.js'
-import { BitStrip, Section } from '../../shared/ui.jsx'
+import { Section } from '../../shared/ui.jsx'
+import ProcessingOrder from './ProcessingOrder.jsx'
 import { useStored } from '../../shared/storage.js'
 
 const PHASES = ['state', 'arrow', 'output', 'next']
@@ -135,7 +136,7 @@ export default function Practice() {
           <input className="field mono" placeholder="Tu propia secuencia" inputMode="numeric" value={custom} onChange={(e) => setCustom(e.target.value.replace(/[^01]/g, '').slice(0, 32))} aria-label="Secuencia propia" />
           <button className="btn" disabled={!customCheck.ok} onClick={() => load(customCheck.value)}>Usar</button>
         </div>
-        <div className="mt-3"><BitStrip bits={bits} highlight={done ? -1 : step} /></div>
+        <div className="mt-3"><ProcessingOrder bits={bits} idx={done ? -1 : step} /></div>
       </Section>
 
       <div className="grid gap-4 lg:grid-cols-5">
@@ -161,7 +162,7 @@ export default function Practice() {
           ) : (
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2 text-sm">
-                Bit de entrada: <span className="chip chip-yellow mono text-lg">{cur.input}</span>
+                Bit que toca procesar (de derecha a izquierda): <span className="chip chip-yellow mono text-lg">{cur.input}</span>
                 {phase !== 'state' && <>Estado actual: <span className="chip chip-blue mono text-lg">{cur.state}</span></>}
               </div>
               <p className="text-base font-bold">{PHASES.indexOf(phase) + 1}. {PHASE_Q[phase]}</p>
